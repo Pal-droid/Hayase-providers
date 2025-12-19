@@ -1,0 +1,7 @@
+{
+  "name": "SubsPlease",
+  "version": "1.0.0",
+  "description": "Subsplease Extension",
+  "main": "index.json",
+  "types": "index.d.ts"
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "SubsPlease",
+    "id": "subsplease",
+    "description": "Subsplease extension",
+    "version": "0.0.1",
+    "type": "torrent",
+    "accuracy": "low",
+    "ratio": 0,
+    "media": "sub",
+    "languages": [
+      "US"
+    ],
+    "icon": "https://subsplease.org/favicon.ico",
+    "update": "gh:Pal-droid/Hayase-providers/subsplease/index.json",
+    "code": "gh:Pal-droid/Hayase-providers/subsplease/provider.js"
+  }
+]
