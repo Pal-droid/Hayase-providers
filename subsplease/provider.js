@@ -1,47 +1,60 @@
-import AbstractSource from './abstract.js'
+class AbstractSource {
+  single (options) {
+    throw new Error('Source doesn\'t implement single')
+  }
 
+  batch (options) {
+    throw new Error('Source doesn\'t implement batch')
+  }
+
+  movie (options) {
+    throw new Error('Source doesn\'t implement movie')
+  }
+
+  test () {
+    throw new Error('Source doesn\'t implement test')
+  }
+}
+
+// 2. YOUR SUBSPLEASE IMPLEMENTATION
 export default new class Subsplease extends AbstractSource {
   /**
    * @type {import('./index.js').SearchFunction}
    */
   async single (query) {
-    // Subsplease uses space-separated search terms
     const searchTerm = query.titles[0]
+    // Subsplease API endpoint
     const url = `https://subsplease.org/api/?f=search&tz=Europe/Rome&s=${encodeURIComponent(searchTerm)}`
 
     const res = await fetch(url)
-    /** @type {import('./types.js').SubspleaseResponse} */
     const data = await res.json()
 
-    // The API returns an Object where keys are the episode names.
-    // We must map these keys to an array of results.
+    // Flatten the odd JSON structure (Key = Filename) into an array
     const results = Object.values(data).flatMap(item => {
       return item.downloads.map(download => {
-        // Parse metadata from the magnet link
         const magnet = download.magnet
         
-        // 1. Extract Hash (Base32 or Hex)
-        // Subsplease often uses Base32 in magnets (e.g., H6EL...) which needs to be parsed or returned as is.
-        // Most clients accept Base32, but standardizing to Hex is safer if you have a helper. 
-        // For this extension, we will extract the raw hash string provided in the magnet.
+        // Extract Hash (Base32)
         const hashMatch = magnet.match(/xt=urn:btih:([a-zA-Z0-9]+)/)
-        const hash = hashMatch ? hashMatch[1] : ''
+        let hash = hashMatch ? hashMatch[1] : ''
 
-        // 2. Extract Size (xl parameter)
-        // The API doesn't give size in JSON, but it is often in the magnet query params as 'xl'
+        // OPTIONAL: Convert Base32 hash to Hex if your client requires it.
+        // For now, we return the raw hash found in the magnet.
+
+        // Extract Size (bytes) from 'xl' param in magnet
         const sizeMatch = magnet.match(/xl=([0-9]+)/)
         const size = sizeMatch ? parseInt(sizeMatch[1], 10) : 0
 
-        // 3. Extract Title (dn parameter) or construct it
+        // Extract Title or build a fallback
         const dnMatch = magnet.match(/dn=([^&]+)/)
-        const title = dnMatch ? decodeURIComponent(dnMatch[1]) : `${item.show} - ${item.episode} (${download.res})`
+        const title = dnMatch 
+          ? decodeURIComponent(dnMatch[1]) 
+          : `${item.show} - ${item.episode} (${download.res})`
 
         return {
           title: title,
           link: magnet,
-          // Subsplease doesn't provide seeders/leechers in API. 
-          // We return 0 or a placeholder as Subsplease is a high-availability seedbox source.
-          seeders: 0,
+          seeders: 0, // API doesn't provide seeders
           leechers: 0,
           downloads: 0,
           accuracy: 'high',
@@ -53,7 +66,7 @@ export default new class Subsplease extends AbstractSource {
       })
     })
 
-    // Filter by resolution if requested in the query
+    // Filter by resolution if requested
     if (query.resolution) {
       return results.filter(r => r.resolution === query.resolution)
     }
@@ -61,7 +74,6 @@ export default new class Subsplease extends AbstractSource {
     return results
   }
 
-  // Subsplease search handles batches and movies via the same endpoint
   batch = this.single
   movie = this.single
 
@@ -74,4 +86,3 @@ export default new class Subsplease extends AbstractSource {
     }
   }
 }()
-
