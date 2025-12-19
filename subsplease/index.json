@@ -12,7 +12,7 @@
       "US"
     ],
     "icon": "https://subsplease.org/favicon.ico",
-    "update": "gh:Pal-droid/Hayase-providers/subsplease/index.json",
-    "code": "gh:Pal-droid/Hayase-providers/subsplease/provider.js"
+    "update": "https://raw.githubusercontent.com/Pal-droid/Hayase-providers/main/subsplease/index.json",
+    "code": "https://raw.githubusercontent.com/Pal-droid/Hayase-providers/main/subsplease/provider.js"
   }
 ]
